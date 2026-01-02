@@ -1,41 +1,28 @@
-# 1. Pastikan di folder root/home
-cd ~
+# 1. Hapus file yang salah
+rm -rf bot.js config.js wintuneling-bot setup_wintuneling.sh
 
-# 2. Buat file installer otomatis
-cat << 'EOF' > install_bot.sh
+# 2. Buat ulang script installer yang benar
+cat << 'EOF' > install_fix.sh
 #!/bin/bash
 GREEN='\033[0;32m'
 NC='\033[0m'
 
-echo -e "${GREEN}[+] MEMULAI INSTALASI WINTUNELING BOT...${NC}"
+echo -e "${GREEN}[+] MEMPERBAIKI INSTALASI...${NC}"
 
-# A. Install Node.js & PM2 (Cek jika belum ada)
-if ! command -v node &> /dev/null; then
-    echo "[-] Menginstall Node.js..."
-    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash - && sudo apt-get install -y nodejs
-fi
-
-if ! command -v pm2 &> /dev/null; then
-    echo "[-] Menginstall PM2..."
-    npm install -g pm2
-fi
-
-# B. Buat Folder Project (Agar rapi)
-# Hapus folder lama jika ada untuk instalasi bersih
-rm -rf wintuneling-bot
+# Setup Folder
 mkdir -p wintuneling-bot
 cd wintuneling-bot
 
-# C. Input Data Konfigurasi
-echo -e "\n${GREEN}[!] SETUP KONFIGURASI:${NC}"
+# Input Konfigurasi Ulang (Mohon isi lagi)
+echo -e "\n${GREEN}[!] KONFIGURASI ULANG:${NC}"
 read -p "1. Bot Token: " IN_TOKEN
 read -p "2. ID Admin (Angka): " IN_ADMIN
-read -p "3. ID Channel (-100...): " IN_CHANNEL
-read -p "4. Username OrderKuota: " IN_OK_USER
+read -p "3. ID Channel (-100..): " IN_CHANNEL
+read -p "4. User OrderKuota: " IN_OK_USER
 read -p "5. Token OrderKuota: " IN_OK_TOKEN
 read -p "6. QRIS String: " IN_QRIS
 
-# D. Buat File config.js
+# Buat config.js
 cat <<EOCONF > config.js
 module.exports = {
     BOT_TOKEN: '$IN_TOKEN',
@@ -48,7 +35,7 @@ module.exports = {
 };
 EOCONF
 
-# E. Buat File bot.js (Kode Utama)
+# Buat bot.js (Kode Asli JavaScript)
 cat << 'EOBOT' > bot.js
 const { Telegraf, Markup } = require('telegraf');
 const axios = require('axios');
@@ -197,24 +184,18 @@ bot.action('info', (ctx) => ctx.reply('ℹ️ @wintunelingvpnBot'));
 bot.launch(); process.once('SIGINT', () => bot.stop('SIGINT'));
 EOBOT
 
-# F. Fix Error "No package.json" & Install Modules
-echo -e "${GREEN}[+] MENGINSTALL MODUL (FIX ERROR)...${NC}"
-# Inisialisasi package.json otomatis agar tidak error ENOENT
+# Install Dependencies (Auto package.json)
 npm init -y > /dev/null
-
-# Install modul yang diperlukan
 npm install telegraf axios sqlite3 qs
 
-# G. Jalankan Bot
-echo -e "${GREEN}[+] MENJALANKAN BOT...${NC}"
+# Jalankan Bot
 pm2 start bot.js --name "wintuneling" --update-env
 pm2 save
 pm2 startup
 
-echo -e "${GREEN}[SUCCESS] Bot Berhasil Terinstall!${NC}"
-echo "Ketik 'pm2 logs wintuneling' untuk cek status."
+echo -e "${GREEN}[SUCCESS] Bot Berhasil Diperbaiki & Berjalan!${NC}"
 EOF
 
-# H. Eksekusi Script
-chmod +x install_bot.sh
-bash install_bot.sh
+# Eksekusi
+chmod +x install_fix.sh
+bash install_fix.sh
